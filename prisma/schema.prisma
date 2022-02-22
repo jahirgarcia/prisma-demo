@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  dept_no      String         @id @db.Char(4)
+  name         String         @unique(map: "dept_name") @db.VarChar(40) @map("dept_name")
+  dept_emp     DepartmentEmployee[]
+  dept_manager DepartmentManager[]
+
+  @@map("departments")
+}
+
+model DepartmentEmployee {
+  employeeId      Int
+  dept_no     String      @db.Char(4)
+  from_date   DateTime    @db.Date
+  to_date     DateTime    @db.Date
+  department Department @relation(fields: [dept_no], references: [dept_no], onDelete: Cascade, onUpdate: NoAction, map: "dept_emp_ibfk_2")
+  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "dept_emp_ibfk_1")
+
+  @@id([employeeId, dept_no])
+  @@index([dept_no], map: "dept_no")
+  @@map("dept_emp")
+}
+
+model DepartmentManager {
+  employeeId      Int
+  dept_no     String      @db.Char(4)
+  from_date   DateTime    @db.Date
+  to_date     DateTime    @db.Date
+  department Department @relation(fields: [dept_no], references: [dept_no], onDelete: Cascade, onUpdate: NoAction, map: "dept_manager_ibfk_2")
+  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "dept_manager_ibfk_1")
+
+  @@id([employeeId, dept_no])
+  @@index([dept_no], map: "dept_no")
+  @@map("dept_manager")
+}
+
+model Employee {
+  id           Int              @id @map("emp_no")
+  birthDate    DateTime         @db.Date @map("birth_date")
+  firstName    String           @db.VarChar(14) @map("first_name")
+  lastName     String           @db.VarChar(16) @map("last_name")
+  gender       EmployeeGender
+  hireDate     DateTime         @db.Date @map("hire_date")
+  departments  DepartmentEmployee[]
+  dept_manager DepartmentManager[]
+  salaries     Salary[]
+  titles       Title[]
+
+	@@map("employees")
+}
+
+model Salary {
+  employeeId Int
+  salary     Int
+  fromDate   DateTime  @db.Date @map("from_date")
+  toDate     DateTime  @db.Date  @map("to_date")
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "salaries_ibfk_1")
+
+  @@id([employeeId, fromDate])
+  @@map("salaries")
+}
+
+model Title {
+  employeeId Int
+  title      String    @db.VarChar(50)
+  fromDate   DateTime  @db.Date @map("from_date")
+  toDate     DateTime? @db.Date @map("to_date")
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "titles_ibfk_1")
+
+  @@id([employeeId, title, fromDate])
+  @@map("titles")
+}
+
+enum EmployeeGender {
+  M
+  F
+}
