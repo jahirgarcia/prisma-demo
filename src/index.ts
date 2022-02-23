@@ -1,24 +1,35 @@
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ['query'],
+});
 
 async function main() {
-  // const employees = await prisma.employee.findMany({
-  //   select: {
-  //     id: true,
-  //     firstName: true,
-  //     lastName: true,
-  //     salaries: {
-  //       select: {
-  //         salary: true
-  //       }
-  //     }
-  //   },
-  //   take: 10,
-  // });
-  // console.log(employees);
-  // const departments = await prisma.department.findMany();
-  // console.log(departments);
+  const employee = await prisma.employee.findFirst({
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      // titles: {
+      //   select: {
+      //     title: true,
+      //   },
+      // },
+      // salaries: {
+      //   select: {
+      //     salary: true
+      //   },
+      //   where: {
+      //     fromDate: undefined
+      //   }
+      // }
+    },
+    where: {
+      id: 10001
+    }
+  });
+
+  console.log(employee);
 }
 
 main()
